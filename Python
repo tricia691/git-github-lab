@@ -1,1 +1,110 @@
+import time  # lets us pause with time.sleep() so we can watch each step
 
+from selenium import webdriver  # controls the browser
+from selenium.webdriver.common.by import By  # tells Selenium HOW to find an element (ID, XPath...)
+from selenium.webdriver.support import select  # (kept from your original imports)
+from selenium.webdriver.support.select import Select  # handles <select> dropdowns
+from selenium.webdriver.common.action_chains import ActionChains  # mouse actions: hover, double click, drag
+
+
+driver = webdriver.Chrome()  # open a Chrome browser
+driver.get("https://testautomationpractice.blogspot.com/")  # go to the practice website
+driver.maximize_window()  # make the browser full screen
+
+action = ActionChains(driver)  # create the tool for mouse actions
+
+# ===================== DATA ENTRY FORM =====================
+
+name_fld = driver.find_element(By.ID, 'name')  # find the Name box by its ID
+name_fld.click()  # click inside the box
+name_fld.send_keys("Tricia Jane")  # type the name
+time.sleep(0.5)  # pause so we can see it
+
+email_fld = driver.find_element(By.ID, 'email')  # find the Email box
+email_fld.click()  # click inside the box
+email_fld.send_keys("tricia.monterona@gmail.com")  # type the email
+time.sleep(0.5)  # pause
+
+phone_fld = driver.find_element(By.ID, 'phone')  # find the Phone box
+phone_fld.click()  # click inside the box
+phone_fld.send_keys("2366")  # type the phone number
+time.sleep(0.5)  # pause
+
+textarea_fld = driver.find_element(By.ID, 'textarea')  # find the Address box (multi-line)
+textarea_fld.click()  # click inside the box
+textarea_fld.send_keys("San Fernando")  # type the address
+time.sleep(0.5)  # pause
+
+gender = driver.find_element(By.ID, 'female')  # find the Female radio button
+gender.click()  # select it (only one radio button can be chosen)
+time.sleep(0.5)  # pause
+
+saturday = driver.find_element(By.ID, 'saturday')  # find the Saturday checkbox
+saturday.click()  # tick it
+time.sleep(0.5)  # pause
+
+thursday = driver.find_element(By.ID, 'thursday')  # find the Thursday checkbox
+thursday.click()  # tick it (checkboxes can be ticked many at once)
+time.sleep(0.5)  # pause
+
+country_fld = driver.find_element(By.ID, 'country')  # find the Country dropdown
+country_fld.click()  # click it to focus
+time.sleep(0.5)  # pause
+selectCountry = Select(country_fld)  # wrap it with Select so we can choose an option
+selectCountry.select_by_value('germany')  # choose Germany using its value attribute
+time.sleep(0.5)  # pause
+
+color_dropdown = driver.find_element(By.ID, 'colors')  # find the Colors dropdown
+time.sleep(0.5)  # pause
+selectColor = Select(color_dropdown)  # wrap it with Select
+selectColor.select_by_value("blue")  # choose Blue
+time.sleep(0.5)  # pause
+
+animals_dropdown = driver.find_element(By.ID, 'animals')  # find the Animals dropdown
+time.sleep(0.5)  # pause
+selectAnimal = Select(animals_dropdown)  # wrap it with Select
+selectAnimal.select_by_value("deer")  # choose Deer
+time.sleep(0.5)  # pause
+
+datepicker1_fld = driver.find_element(By.ID, 'datepicker')  # find the first date box
+datepicker1_fld.click()  # click it to open the calendar
+time.sleep(0.5)  # pause
+date1 = driver.find_element(By.LINK_TEXT, '11')  # find day 11 in the calendar
+date1.click()  # click day 11
+time.sleep(0.5)  # pause
+
+datepicker2_fld = driver.find_element(By.ID, 'txtDate')  # find the second date box
+datepicker2_fld.click()  # click it to open the calendar
+time.sleep(0.5)  # pause
+date2 = driver.find_element(By.LINK_TEXT, '17')  # find day 17 in the calendar
+date2.click()  # click day 17
+time.sleep(0.5)  # pause
+
+date_picker = driver.find_element(By.CLASS_NAME, 'date-picker-box')  # find the date range section
+action.move_to_element(date_picker).perform()  # move the mouse there so it scrolls into view
+time.sleep(0.5)  # pause
+
+r1_datepicker3_fld = driver.find_element(By.ID, 'start-date')  # find the start date box
+time.sleep(0.5)  # pause
+r1_datepicker3_fld.send_keys("2021-03-31")  # type the start date
+time.sleep(1)  # pause
+
+r2_datepicker3_fld = driver.find_element(By.ID, 'end-date')  # find the end date box
+r2_datepicker3_fld.send_keys("2021-04-9")  # type the end date
+time.sleep(0.5)  # pause
+
+submit_date = driver.find_element(By.CLASS_NAME, 'submit-btn')  # find the Submit button
+submit_date.click()  # click Submit
+time.sleep(1)  # pause
+
+# ===================== UPLOAD FILES =====================
+
+file1 = r"C:\Users\Public\test1.txt"  # path of the first file (CHANGE to a real file)
+file2 = r"C:\Users\Public\test2.txt"  # path of the second file (CHANGE to a real file)
+
+single_upload = driver.find_element(By.XPATH, "//input[@id='singleFileInput']")  # find the single file input
+driver.execute_script("arguments[0].scrollIntoView({block:'center'});", single_upload)  # scroll to it
+time.sleep(1)  # pause
+single_upload.send_keys(file1)  # give it the file path (this uploads the file)
+time.sleep(0.5)  # pause
+driver.find_element(By.XPATH, "//button[text()='Upload Single File']").click()  # click 
