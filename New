@@ -149,10 +149,10 @@ action.move_to_element(driver.find_element(By.LINK_TEXT, 'Rihanna singles discog
 time.sleep(0.5)
 action.move_to_element(driver.find_element(By.LINK_TEXT, 'Rihanna albums discography')).perform()
 time.sleep(0.5)
-shrek_2 = driver.find_element(By.LINK_TEXT, 'Rihanna videography')
-action.move_to_element(shrek_2).perform()
+rihanna_2 = driver.find_element(By.LINK_TEXT, 'Rihanna videography')
+action.move_to_element(rihanna_2).perform()
 time.sleep(0.5)
-shrek_2.click()
+rihanna_2.click()
 time.sleep(2)
 driver.switch_to.window(driver.window_handles[-1])
 driver.close()
@@ -183,7 +183,7 @@ time.sleep(0.5)
 
 driver.find_element(By.ID, 'promptBtn').click()
 time.sleep(0.5)
-driver.switch_to.alert.send_keys("Shrek")
+driver.switch_to.alert.send_keys("Rihanna")
 time.sleep(0.5)
 driver.switch_to.alert.accept()
 time.sleep(0.5)
@@ -210,171 +210,228 @@ driver.close()
 driver.switch_to.window(driver.window_handles[0])
 time.sleep(0.5)
 
-action.move_to_element(driver.find_element(By.CLASS_NAME, 'dropbtn')).perform()
-time.sleep(1)
-action.move_to_element(driver.find_element(By.LINK_TEXT, 'Mobiles')).perform()
-time.sleep(0.5)
-laptops_link = driver.find_element(By.LINK_TEXT, 'Laptops')
-action.move_to_element(laptops_link).perform()
-time.sleep(0.5)
-laptops_link.click()
-time.sleep(0.5)
 
-field1_txt = driver.find_element(By.ID, 'field1')
-action.move_to_element(field1_txt).perform()
-time.sleep(0.5)
-copy_btn = driver.find_element(By.XPATH, '//*[@id="HTML10"]/div[1]/button')
-action.move_to_element(copy_btn).perform()
-time.sleep(0.5)
-action.double_click(copy_btn).perform()
-time.sleep(1)
+# =====================================================================
+# FIXED PART (everything above is unchanged except Shrek -> Rihanna)
+#
+# Why it crashed before: By.LINK_TEXT only matches *visible* text, and the
+# "Mobiles" / "Laptops" links are hidden until the mouse hovers 'dropbtn'.
+# XPath finds them even when hidden, and a JS click works as a fallback.
+#
+# Every section below is isolated: if one fails it is recorded, the browser
+# is put back on the practice page, and the script carries on to the end.
+# A summary of any failed sections is printed when the script finishes.
+# =====================================================================
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
-draggable = driver.find_element(By.ID, 'draggable')
-action.move_to_element(draggable).perform()
-time.sleep(1)
-action.drag_and_drop(draggable, driver.find_element(By.ID, 'droppable')).perform()
-time.sleep(1)
+BASE_URL = "https://testautomationpractice.blogspot.com/"
+driver.set_page_load_timeout(30)   # slow external sites (apple, dell...) won't hang the run
+failed = []
 
-slider_handles = driver.find_elements(By.CLASS_NAME, 'ui-slider-handle')
-action.move_to_element(slider_handles[0]).perform()
-time.sleep(1)
-action.drag_and_drop_by_offset(slider_handles[0], 50, 0).perform()
-time.sleep(1)
-action.drag_and_drop_by_offset(slider_handles[1], -30, 0).perform()
-time.sleep(1)
 
-action.move_to_element(driver.find_element(By.XPATH, '//*[name()="circle"]')).perform()
-time.sleep(0.5)
-action.move_to_element(driver.find_element(By.XPATH, '//*[name()="rect"]')).perform()
-time.sleep(0.5)
-action.move_to_element(driver.find_element(By.XPATH, '//*[name()="polygon"]')).perform()
-time.sleep(0.5)
+def wait_for(by, value, timeout=10):
+    return WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
 
-driver.find_element(By.ID, 'comboBox').click()
-time.sleep(0.5)
-driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", driver.find_element(By.ID, 'dropdown'))
-time.sleep(1)
-action.move_to_element(driver.find_element(By.XPATH, '//*[@id="dropdown"]/div[1]')).perform()
-time.sleep(0.5)
-action.move_to_element(driver.find_element(By.XPATH, '//*[@id="dropdown"]/div[2]')).perform()
-time.sleep(0.5)
-action.move_to_element(driver.find_element(By.XPATH, '//*[@id="dropdown"]/div[3]')).perform()
-time.sleep(0.5)
-item_90= driver.find_element(By.XPATH, '//*[@id="dropdown"]/div[90]')
-action.move_to_element(item_90).perform()
-time.sleep(0.5)
-item_90.click()
-time.sleep(0.5)
 
-action.move_to_element(driver.find_element(By.ID, 'section1')).perform()
-time.sleep(0.5)
-driver.find_element(By.ID, 'input1').send_keys("Section 1")
-time.sleep(0.5)
-driver.find_element(By.ID, 'btn1').click()
-time.sleep(0.5)
+def hover(el):
+    try:
+        ActionChains(driver).move_to_element(el).perform()
+    except Exception as e:
+        print("  (hover skipped:", type(e).__name__, ")")
+    time.sleep(0.5)
 
-action.move_to_element(driver.find_element(By.ID, 'section2')).perform()
-time.sleep(0.5)
-driver.find_element(By.ID, 'input2').send_keys("Section 2")
-time.sleep(0.5)
-driver.find_element(By.ID, 'btn2').click()
-time.sleep(0.5)
 
-action.move_to_element(driver.find_element(By.ID, 'section3')).perform()
-time.sleep(0.5)
-driver.find_element(By.ID, 'input3').send_keys("Section 3")
-time.sleep(0.5)
-driver.find_element(By.ID, 'btn3').click()
-time.sleep(0.5)
+def safe_click(el):
+    try:
+        el.click()
+    except TimeoutException:
+        raise
+    except Exception:
+        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+        driver.execute_script("arguments[0].click();", el)
 
-shadow_host = driver.find_element(By.ID, 'shadow_host')
-action.move_to_element(shadow_host).perform()
-time.sleep(1)
-shadow_root = shadow_host.shadow_root
-shadow_root.find_element(By.CSS_SELECTOR, 'input[type="text"]').send_keys("Shadow DOM")
-time.sleep(0.5)
-shadow_root.find_element(By.CSS_SELECTOR, 'input[type="checkbox"]').click()
-time.sleep(0.5)
-shadow_root.find_element(By.CSS_SELECTOR, 'input[type="file"]').send_keys(r"C:\Users\UCSOUTH\Documents\picture")
-time.sleep(0.5)
-action.move_to_element(shadow_root.find_element(By.CSS_SELECTOR, 'a')).perform()
-time.sleep(0.5)
-print(shadow_root.find_element(By.CSS_SELECTOR, '#nested_shadow_host').shadow_root.find_element(By.CSS_SELECTOR, '#nested_shadow_content').text)
-time.sleep(1)
 
-action.move_to_element(driver.find_element(By.ID, 'samsung')).perform()
-time.sleep(0.5)
-action.move_to_element(driver.find_element(By.ID, 'realme')).perform()
-time.sleep(0.5)
-action.move_to_element(driver.find_element(By.ID, 'moto')).perform()
-time.sleep(0.5)
+def link_by_text(text):
+    return wait_for(By.XPATH, f"//a[normalize-space(.)='{text}']")
+
+
+def back_to_main():
+    """Close extra tabs/popups, return to the main window and the practice page."""
+    main = driver.window_handles[0]
+    for handle in driver.window_handles[1:]:
+        driver.switch_to.window(handle)
+        driver.close()
+    driver.switch_to.window(main)
+    if "testautomationpractice.blogspot.com" not in driver.current_url:
+        try:
+            driver.get(BASE_URL)
+        except TimeoutException:
+            pass
+        time.sleep(1)
+
+
+def open_and_return(el):
+    """Click a link, wait, then come back to the practice page."""
+    hover(el)
+    try:
+        safe_click(el)
+    except TimeoutException:
+        pass
+    time.sleep(2)
+    if len(driver.window_handles) == 1:
+        try:
+            driver.back()
+        except TimeoutException:
+            pass
+        time.sleep(1)
+    back_to_main()
+
+
+def attempt(label, fn):
+    """A small optional step inside a section: skip it quietly if it fails."""
+    try:
+        fn()
+    except Exception as e:
+        print(f"  (skipped {label}: {type(e).__name__})")
+
+
+def run(label, fn):
+    """Run one section; on failure record it and keep going."""
+    print("Running:", label)
+    try:
+        fn()
+    except Exception as e:
+        msg = str(e).splitlines()[0] if str(e) else ""
+        print(f"  !! {label} failed: {type(e).__name__}: {msg}")
+        failed.append(label)
+        try:
+            back_to_main()
+        except Exception:
+            pass
+
+
+def section_dropdown():
+    hover(wait_for(By.CLASS_NAME, 'dropbtn'))
+    time.sleep(0.5)
+    hover(link_by_text('Mobiles'))
+    laptops_link = link_by_text('Laptops')
+    hover(laptops_link)
+    safe_click(laptops_link)
+    time.sleep(0.5)
+
+
+def section_double_click():
+    hover(wait_for(By.ID, 'field1'))
+    copy_btn = wait_for(By.XPATH, '//*[@id="HTML10"]/div[1]/button')
+    hover(copy_btn)
+    ActionChains(driver).double_click(copy_btn).perform()
+    time.sleep(1)
+
+
+def section_drag_drop():
+    draggable = wait_for(By.ID, 'draggable')
+    droppable = wait_for(By.ID, 'droppable')
+    hover(draggable)
+    time.sleep(0.5)
+    ActionChains(driver).drag_and_drop(draggable, droppable).perform()
+    time.sleep(1)
+
+
+def section_sliders():
+    wait_for(By.CLASS_NAME, 'ui-slider-handle')
+    handles = driver.find_elements(By.CLASS_NAME, 'ui-slider-handle')
+    hover(handles[0])
+    ActionChains(driver).drag_and_drop_by_offset(handles[0], 50, 0).perform()
+    time.sleep(1)
+    if len(handles) > 1:
+        ActionChains(driver).drag_and_drop_by_offset(handles[1], -30, 0).perform()
+        time.sleep(1)
+
+
+def section_svg():
+    for tag in ('circle', 'rect', 'polygon'):
+        attempt(f"svg {tag}",
+                lambda t=tag: hover(wait_for(By.XPATH, f'//*[name()="{t}"]', timeout=5)))
+
+
+def section_combobox():
+    safe_click(wait_for(By.ID, 'comboBox'))
+    time.sleep(0.5)
+    dropdown = wait_for(By.ID, 'dropdown')
+    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", dropdown)
+    time.sleep(1)
+    items = driver.find_elements(By.XPATH, '//*[@id="dropdown"]/div')
+    if not items:
+        raise Exception("combo box has no items")
+    for item in items[:3]:
+        hover(item)
+    target = items[89] if len(items) >= 90 else items[-1]   # item 90, or the last one
+    hover(target)
+    safe_click(target)
+    time.sleep(0.5)
+
+
+def section_inputs():
+    for n in (1, 2, 3):
+        hover(wait_for(By.ID, f'section{n}'))
+        driver.find_element(By.ID, f'input{n}').send_keys(f"Section {n}")
+        time.sleep(0.5)
+        safe_click(driver.find_element(By.ID, f'btn{n}'))
+        time.sleep(0.5)
+
+
+def section_shadow():
+    shadow_host = wait_for(By.ID, 'shadow_host')
+    hover(shadow_host)
+    time.sleep(0.5)
+    shadow_root = shadow_host.shadow_root
+    attempt("shadow text", lambda: shadow_root.find_element(
+        By.CSS_SELECTOR, 'input[type="text"]').send_keys("Shadow DOM"))
+    attempt("shadow checkbox", lambda: safe_click(shadow_root.find_element(
+        By.CSS_SELECTOR, 'input[type="checkbox"]')))
+    attempt("shadow file", lambda: shadow_root.find_element(
+        By.CSS_SELECTOR, 'input[type="file"]').send_keys(r"C:\Users\UCSOUTH\Documents\picture"))
+    attempt("shadow link", lambda: hover(shadow_root.find_element(By.CSS_SELECTOR, 'a')))
+    attempt("nested shadow", lambda: print(
+        shadow_root.find_element(By.CSS_SELECTOR, '#nested_shadow_host').shadow_root
+        .find_element(By.CSS_SELECTOR, '#nested_shadow_content').text))
+    time.sleep(1)
+
+
+def section_dynamic_links():
+    for link_id in ('samsung', 'realme', 'moto'):
+        attempt(link_id, lambda i=link_id: hover(wait_for(By.ID, i, timeout=5)))
+
+
+run("Dropdown (Mobiles / Laptops)", section_dropdown)
+run("Double click copy text", section_double_click)
+run("Drag and drop", section_drag_drop)
+run("Sliders", section_sliders)
+run("SVG shapes", section_svg)
+run("Scrollable combo box", section_combobox)
+run("Section 1-3 inputs", section_inputs)
+run("Shadow DOM", section_shadow)
+run("Mobile labels hover", section_dynamic_links)
 
 for laptop_id in ['apple', 'lenovo', 'dell']:
-    laptop_link = driver.find_element(By.ID, laptop_id)
-    action.move_to_element(laptop_link).perform()
-    time.sleep(0.5)
-    laptop_link.click()
-    time.sleep(2)
-    driver.back()
-    time.sleep(1)
+    run(f"Laptop link {laptop_id}",
+        lambda i=laptop_id: open_and_return(wait_for(By.ID, i)))
 
 for code in ['400', '401', '403', '404', '408', '500', '502', '503']:
-    broken_link = driver.find_element(By.LINK_TEXT, f'Errorcode {code}')
-    action.move_to_element(broken_link).perform()
-    time.sleep(0.5)
-    broken_link.click()
-    time.sleep(2)
-    driver.back()
-    time.sleep(1)
+    run(f"Broken link Errorcode {code}",
+        lambda c=code: open_and_return(link_by_text(f'Errorcode {c}')))
 
-for link_text in ['Udemy Courses', 'Online Trainings', 'Blog', 'PlaywrightPractice', 'Hidden Elements & AJAX', 'Download Files']:
-    nav_link = driver.find_element(By.LINK_TEXT, link_text)
-    action.move_to_element(nav_link).perform()
-    time.sleep(0.5)
-    nav_link.click()
-    time.sleep(2)
-    driver.back()
-    time.sleep(1)
+for link_text in ['Udemy Courses', 'Online Trainings', 'Blog', 'PlaywrightPractice',
+                  'Hidden Elements & AJAX', 'Download Files']:
+    run(f"Open link {link_text}",
+        lambda t=link_text: open_and_return(link_by_text(t)))
+
+print()
+if failed:
+    print("Finished. Sections that failed:", ", ".join(failed))
+else:
+    print("Finished. All sections ran without errors.")
 
 time.sleep(5)
-
-
-C:\Users\UCSOUTH\Desktop\project_monterona\.venv\Scripts\python.exe C:\Users\UCSOUTH\Desktop\project_monterona\automatePractice.py 
-Traceback (most recent call last):
-  File "C:\Users\UCSOUTH\Desktop\project_monterona\automatePractice.py", line 215, in <module>
-    action.move_to_element(driver.find_element(By.LINK_TEXT, 'Mobiles')).perform()
-                           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\UCSOUTH\Desktop\project_monterona\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 974, in find_element
-    return self.execute(Command.FIND_ELEMENT, {"using": by, "value": value})["value"]
-           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\UCSOUTH\Desktop\project_monterona\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 566, in execute
-    self.error_handler.check_response(response)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
-  File "C:\Users\UCSOUTH\Desktop\project_monterona\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 234, in check_response
-    raise exception_class(message, screen, stacktrace)
-selenium.common.exceptions.NoSuchElementException: Message: no such element: Unable to locate element: {"method":"link text","selector":"Mobiles"}
-  (Session info: chrome=158.0.8127.37); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
-Stacktrace:
-Symbols not available. Dumping unresolved backtrace:
-	(No symbol) [0x7ff74c3f0f05]
-	(No symbol) [0x7ff74c2f1db0]
-	(No symbol) [0x7ff74c173433]
-	(No symbol) [0x7ff74c9b5ff1]
-	(No symbol) [0x7ff74c9b624c]
-	(No symbol) [0x7ff74c9e4647]
-	(No symbol) [0x7ff74c1a5b01]
-	(No symbol) [0x7ff74c18bea1]
-	(No symbol) [0x7ff74c18d1d3]
-	(No symbol) [0x7ff74c890f4f]
-	(No symbol) [0x7ff74c8b7678]
-	(No symbol) [0x7ff74c8aaf68]
-	(No symbol) [0x7ff74c50e62e]
-	(No symbol) [0x7ff74c3016f3]
-	(No symbol) [0x7ff74c2fc304]
-	(No symbol) [0x7ff74c2fc494]
-	(No symbol) [0x7ff74c2e509c]
-	(No symbol) [0x7ffe7a04dda7]
-	(No symbol) [0x7ffe7ae19c5c]
-
-
-Process finished with exit code 1
