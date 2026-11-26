@@ -1,0 +1,68 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+import pytest
+import time
+
+driver = webdriver.Chrome()
+driver.get("https://practicetestautomation.com/")
+driver.maximize_window()
+driver.implicitly_wait(10)
+driver.find_element(By.XPATH, '//*[@id="menu-item-20"]/a').click()
+time.sleep(2)
+driver.find_element(By.LINK_TEXT, "Test Exceptions").click()
+time.sleep(2)
+
+
+def open_page():
+    driver.get("https://practicetestautomation.com/practice-test-exceptions/")
+
+
+def test_case_1_row_2_input_is_displayed():
+    open_page()                                              # 1. Open page
+    driver.find_element(By.ID, "add_btn").click()            # 2. Click Add button
+    row2 = driver.find_element(By.XPATH, '//div[@id="row2"]/input')  # waits up to 10s for Row 2
+    time.sleep(2)
+    assert row2.is_displayed()                               # 3. Verify Row 2 input is displayed
+
+
+def test_case_2_save_text_in_row_2():
+    open_page()                                              # 1. Open page
+    driver.find_element(By.ID, "add_btn").click()            # 2. Click Add button
+    row2 = driver.find_element(By.XPATH, '//div[@id="row2"]/input')  # 3. Wait for second row to load
+    row2.send_keys("Pasta")                                  # 4. Type text into second input
+    driver.find_elements(By.NAME, "Save")[1].click()         # 5. Push Save (the 2nd one, the 1st is hidden)
+    time.sleep(2)
+    assert "saved" in driver.find_element(By.ID, "confirmation").text   # 6. Verify text saved
+
+
+def test_case_3_edit_text_in_row_1():
+    open_page()                                              # 1. Open page
+    driver.find_element(By.ID, "edit_btn").click()           # Click Edit first, the input is disabled
+    row1 = driver.find_element(By.XPATH, '//div[@id="row1"]/input')
+    row1.clear()                                             # 2. Clear input field
+    row1.send_keys("Pizza")                                  # 3. Type text into input field
+    time.sleep(2)
+    assert row1.get_attribute("value") == "Pizza"            # 4. Verify text changed
+
+
+def test_case_4_instructions_disappear():
+    open_page()                                              # 1. Open page
+    driver.find_element(By.ID, "instructions")               # 2. Find the instructions text element
+    driver.find_element(By.ID, "add_btn").click()            # 3. Push Add button
+    time.sleep(2)
+    assert len(driver.find_elements(By.ID, "instructions")) == 0   # 4. Verify it is no longer displayed
+
+
+def test_case_5_timeout_after_3_seconds():
+    open_page()                                              # 1. Open page
+    driver.implicitly_wait(0)                                # so the 3 second wait really lasts 3 seconds
+    driver.find_element(By.ID, "add_btn").click()            # 2. Click Add button
+    with pytest.raises(TimeoutException):                    # 3 and 4. Row 2 takes ~5s, so waiting 3s must time out
+        WebDriverWait(driver, 3).until(
+            EC.visibility_of_element_located((By.XPATH, '//div[@id="row2"]/input')))
+    driver.implicitly_wait(10)
+    time.sleep(2)
+    driver.quit()
