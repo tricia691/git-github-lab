@@ -22,6 +22,7 @@ def login(username, password):
 def test_positive_login():
     login("student", "Password123")
     time.sleep(2)
+    driver.save_screenshot("test1.png")
     assert "practicetestautomation.com/logged-in-successfully/" in driver.current_url
     assert "Congratulations" in driver.page_source or "successfully logged in" in driver.page_source
     assert driver.find_element(By.LINK_TEXT, "Log out").is_displayed()
@@ -29,7 +30,8 @@ def test_positive_login():
 
 def test_negative_username():
     login("incorrectUser", "Password123")
-    time.sleep(2)
+    time.sleep(1)
+    driver.save_screenshot("test2.png")
     error = driver.find_element(By.ID, "error")
     assert error.is_displayed()
     assert error.text == "Your username is invalid!"
@@ -37,8 +39,10 @@ def test_negative_username():
 
 def test_negative_password():
     login("student", "incorrectPassword")
-    time.sleep(2)
+    time.sleep(1)
+    driver.save_screenshot("test3.png")
     error = driver.find_element(By.ID, "error")
     assert error.is_displayed()
     assert error.text == "Your password is invalid!"
+
     driver.quit()
